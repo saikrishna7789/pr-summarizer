@@ -147,7 +147,7 @@ Respond with ONLY this JSON structure:
       headers: {
         "Content-Type": "application/json",
         "x-api-key": anthropicKey,
-        "anthropic-version": "2023-06-01",
+        "anthropic-version": "2024-06-01",
       },
       body: JSON.stringify({ model: modelName, max_tokens: 1000, messages: [{ role: "user", content: prompt }] }),
     });
