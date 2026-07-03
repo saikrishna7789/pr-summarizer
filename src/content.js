@@ -163,24 +163,48 @@ Respond with ONLY this JSON structure:
 
   async function generateWithOllama(prData, ollamaUrl, modelName) {
     const prompt = buildPrompt(prData);
-    const base = (ollamaUrl || "http://localhost:11434").replace(/\/$/, "");
-    const url = `${base}/api/generate`;
-    const body = { model: modelName || "qwen2.5-coder:7b", prompt, stream: false };
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+
+    const data = await chrome.runtime.sendMessage({
+        type: "OLLAMA",
+        prompt: prompt,
+        ollamaUrl: ollamaUrl || "http://localhost:11434",
+        model: modelName || "qwen2.5-coder:7b"
     });
-    if (!response.ok) {
-      const err = await response.text().catch(() => "");
-      throw new Error(err || `Ollama API error ${response.status}`);
+
+    if (!data) {
+        throw new Error("No response received from background service.");
     }
-    const data = await response.json().catch(() => ({}));
-    // Try common fields returned by Ollama / local wrappers
-    const text = data?.choices?.[0]?.content || data?.choices?.[0]?.message?.content || data?.output || data?.text || "";
-    const clean = String(text).replace(/```json|```/gi, "").trim();
-    return JSON.parse(clean);
-  }
+
+    if (data.error) {
+        throw new Error(data.error);
+    }
+
+    if (!data.success) {
+        throw new Error(data.error || "Unknown error");
+    }
+
+    const text = data.response;
+
+    if (!text) {
+        throw new Error("Empty response from Ollama.");
+    }
+
+    // Remove markdown fences if the model adds them
+    const clean = text
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+    // Extract JSON if extra text exists
+    const match = clean.match(/\{[\s\S]*\}/);
+
+    if (!match) {
+        console.log("Ollama Raw Response:", clean);
+        throw new Error("Model did not return valid JSON.");
+    }
+
+    return JSON.parse(match[0]);
+}
 
   // Unified entrypoint: chooses provider based on stored settings
   async function generateSummary(prData, settings) {
