@@ -165,7 +165,7 @@ Respond with ONLY this JSON structure:
     const prompt = buildPrompt(prData);
     const base = (ollamaUrl || "http://localhost:11434").replace(/\/$/, "");
     const url = `${base}/api/generate`;
-    const body = { model: modelName || "", prompt };
+    const body = { model: modelName || "qwen2.5-coder:7b", prompt, stream: false };
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
