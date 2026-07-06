@@ -147,7 +147,7 @@ Respond with ONLY this JSON structure:
       headers: {
         "Content-Type": "application/json",
         "x-api-key": anthropicKey,
-        "anthropic-version": "2023-06-01",
+        "anthropic-version": "2024-06-01",
       },
       body: JSON.stringify({ model: modelName, max_tokens: 1000, messages: [{ role: "user", content: prompt }] }),
     });
@@ -161,26 +161,95 @@ Respond with ONLY this JSON structure:
     return JSON.parse(clean);
   }
 
-  async function generateWithOllama(prData, ollamaUrl, modelName) {
+async function generateWithOllama(prData, ollamaUrl, modelName) {
+
     const prompt = buildPrompt(prData);
-    const base = (ollamaUrl || "http://localhost:11434").replace(/\/$/, "");
-    const url = `${base}/api/generate`;
-    const body = { model: modelName || "", prompt };
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!response.ok) {
-      const err = await response.text().catch(() => "");
-      throw new Error(err || `Ollama API error ${response.status}`);
+
+    console.log("========== OLLAMA DEBUG ==========");
+    console.log("URL:", ollamaUrl);
+    console.log("Model:", modelName);
+    console.log("Prompt length:", prompt.length);
+
+    let data;
+
+    try {
+
+        data = await chrome.runtime.sendMessage({
+            type: "OLLAMA",
+            prompt: prompt,
+            ollamaUrl: ollamaUrl || "http://127.0.0.1:11434",
+            model: modelName || "qwen2.5-coder:7b"
+        });
+
+        console.log("Background Response:", data);
+
+    } catch (error) {
+
+        console.error("sendMessage failed:", error);
+
+        throw new Error(
+            "Background communication failed: " + error.message
+        );
     }
-    const data = await response.json().catch(() => ({}));
-    // Try common fields returned by Ollama / local wrappers
-    const text = data?.choices?.[0]?.content || data?.choices?.[0]?.message?.content || data?.output || data?.text || "";
-    const clean = String(text).replace(/```json|```/gi, "").trim();
-    return JSON.parse(clean);
-  }
+
+    if (data === undefined) {
+        throw new Error(
+            "Background returned undefined. Check Service Worker console."
+        );
+    }
+
+    if (data === null) {
+        throw new Error(
+            "Background returned null."
+        );
+    }
+
+    if (data.success !== true) {
+
+        console.error("Ollama failure response:", data);
+
+        throw new Error(
+            data.error
+                ? String(data.error)
+                : "Background request failed. Response: " +
+                  JSON.stringify(data)
+        );
+    }
+
+    if (!data.response) {
+        throw new Error(
+            "Ollama returned empty response: " +
+            JSON.stringify(data)
+        );
+    }
+
+    console.log("Raw Ollama Output:", data.response);
+
+    const clean = data.response
+        .replace(/```json/gi, "")
+        .replace(/```/g, "")
+        .trim();
+
+    const match = clean.match(/\{[\s\S]*\}/);
+
+    if (!match) {
+        throw new Error(
+            "No JSON found in model output: " +
+            clean.substring(0, 500)
+        );
+    }
+
+    try {
+        return JSON.parse(match[0]);
+    } catch (error) {
+
+        console.error("JSON parse failure:", match[0]);
+
+        throw new Error(
+            "Invalid JSON from model: " + error.message
+        );
+    }
+}
 
   // Unified entrypoint: chooses provider based on stored settings
   async function generateSummary(prData, settings) {
