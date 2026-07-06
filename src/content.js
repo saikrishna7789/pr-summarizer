@@ -98,29 +98,94 @@
 
   // ─── AI Summary ──────────────────────────────────────────────────────────
   // Build the prompt shared by all providers
-  function buildPrompt(prData) {
-    return `You are a senior code reviewer. Analyze this pull request and respond ONLY with a JSON object — no markdown, no explanation.
+function buildPrompt(prData) {
+  return `
+You are a senior software engineer and expert code reviewer.
 
-PR Title: ${prData.title}
+Analyze the following Pull Request carefully.
 
-Description:
+Return ONLY valid JSON.
+Do not return markdown.
+Do not use code fences.
+Do not add explanations outside the JSON.
+
+PR TITLE:
+${prData.title}
+
+PR DESCRIPTION:
 ${prData.description || "(none)"}
 
-Files changed: ${prData.filesChanged}
-Changed file paths: ${prData.changedFiles.slice(0, 20).join(", ") || "(not detected)"}
+FILES CHANGED:
+${prData.filesChanged}
 
-Diff sample:
-${prData.diffSample || "(diff not loaded yet — user may need to click 'Files changed' tab first)"}
+CHANGED FILE PATHS:
+${prData.changedFiles.slice(0, 30).join("\n") || "(not detected)"}
 
-Respond with ONLY this JSON structure:
+DIFF:
+${prData.diffSample || "(diff not available)"}
+
+Analyze:
+
+1. Purpose of the change
+2. Overall risk
+3. Risk score from 0 to 100
+4. Potential bugs
+5. Missing tests
+6. Security concerns
+7. Performance concerns
+8. Important review points
+9. Technical summary
+
+Risk score guidance:
+
+0-20   = Very Low
+21-40  = Low
+41-60  = Medium
+61-80  = High
+81-100 = Critical
+
+Return exactly this JSON structure:
+
 {
-  "purpose": "One sentence describing what this PR does",
-  "risk": "Low | Medium | High",
-  "riskReason": "One sentence explaining the risk level",
-  "reviewFocus": ["item 1", "item 2", "item 3"],
+  "purpose": "One sentence describing the purpose",
+
+  "risk": "Low | Medium | High | Critical",
+
+  "riskScore": 50,
+
+  "riskReason": "Short explanation of the risk score",
+
+  "potentialBugs": [
+    {
+      "severity": "Low | Medium | High",
+      "file": "file name if known",
+      "issue": "Potential problem",
+      "suggestion": "Recommended fix"
+    }
+  ],
+
+  "missingTests": [
+    "Missing test scenario"
+  ],
+
+  "securityConcerns": [
+    "Security concern"
+  ],
+
+  "performanceConcerns": [
+    "Performance concern"
+  ],
+
+  "reviewFocus": [
+    "Important review point"
+  ],
+
   "summary": "2-3 sentence technical summary"
-}`;
-  }
+}
+
+If no issue exists for an array field, return an empty array.
+`;
+}
 
   async function generateWithGemini(prData, googleKey, modelName = "gemini-1.0") {
     const prompt = buildPrompt(prData);
@@ -349,45 +414,278 @@ async function generateWithOllama(prData, ollamaUrl, modelName) {
         </div>`;
     }
 
-    if (state === "result") {
-      const { purpose, risk, riskReason, reviewFocus, summary, filesChanged } = data;
-      const focusItems = (reviewFocus || [])
-        .map((f) => `<li>${escapeHTML(f)}</li>`)
-        .join("");
-      return `
-        <div class="prs-header">
-          <span class="prs-logo">◆</span>
-          <span class="prs-title">AI PR Summary</span>
-          <button class="prs-btn prs-btn-ghost prs-regen" id="prs-regenerate-btn" title="Regenerate">↻ Regenerate</button>
-        </div>
-        <div class="prs-body">
-          <div class="prs-row">
-            <span class="prs-label">Purpose</span>
-            <span class="prs-value">${escapeHTML(purpose || "—")}</span>
-          </div>
-          <div class="prs-row">
-            <span class="prs-label">Files Changed</span>
-            <span class="prs-value">${escapeHTML(String(filesChanged || "?"))}</span>
-          </div>
-          <div class="prs-row prs-row-risk">
-            <span class="prs-label">Risk</span>
-            <span class="prs-value">
-              <span class="prs-risk-badge ${getRiskClass(risk)}">${escapeHTML(risk || "?")}</span>
-              <span class="prs-risk-reason">${escapeHTML(riskReason || "")}</span>
-            </span>
-          </div>
-          ${summary ? `
-          <div class="prs-row">
-            <span class="prs-label">Summary</span>
-            <span class="prs-value prs-summary">${escapeHTML(summary)}</span>
-          </div>` : ""}
-          ${focusItems ? `
-          <div class="prs-row prs-row-focus">
-            <span class="prs-label">Review Focus</span>
-            <ul class="prs-focus-list">${focusItems}</ul>
-          </div>` : ""}
-        </div>`;
+if (state === "result") {
+
+  const {
+    purpose,
+    risk,
+    riskScore,
+    riskReason,
+    potentialBugs,
+    missingTests,
+    securityConcerns,
+    performanceConcerns,
+    reviewFocus,
+    summary,
+    filesChanged
+  } = data;
+
+
+  const createList = (items = []) => {
+
+    if (!items.length) {
+      return `<div class="prs-empty">No issues detected</div>`;
     }
+
+    return `
+      <ul class="prs-focus-list">
+        ${items
+          .map(item => `<li>${escapeHTML(item)}</li>`)
+          .join("")}
+      </ul>
+    `;
+  };
+
+
+  const bugHTML = (potentialBugs || [])
+    .map(bug => `
+      <div class="prs-bug">
+
+        <div class="prs-bug-header">
+
+          <span class="prs-severity prs-severity-${String(
+            bug.severity || "medium"
+          ).toLowerCase()}">
+
+            ${escapeHTML(bug.severity || "Medium")}
+
+          </span>
+
+          <span class="prs-bug-file">
+            ${escapeHTML(bug.file || "Unknown file")}
+          </span>
+
+        </div>
+
+        <div class="prs-bug-issue">
+          ${escapeHTML(bug.issue || "")}
+        </div>
+
+        ${
+          bug.suggestion
+            ? `
+              <div class="prs-bug-suggestion">
+                Suggestion: ${escapeHTML(bug.suggestion)}
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+    `)
+    .join("");
+
+
+  return `
+
+    <div class="prs-header">
+
+      <span class="prs-logo">◆</span>
+
+      <span class="prs-title">
+        AI PR Review
+      </span>
+
+      <button
+        class="prs-btn prs-btn-ghost prs-regen"
+        id="prs-regenerate-btn">
+
+        ↻ Regenerate
+
+      </button>
+
+    </div>
+
+
+    <div class="prs-body">
+
+
+      <!-- PURPOSE -->
+
+      <div class="prs-row">
+
+        <span class="prs-label">
+          Purpose
+        </span>
+
+        <span class="prs-value">
+          ${escapeHTML(purpose || "—")}
+        </span>
+
+      </div>
+
+
+      <!-- FILES -->
+
+      <div class="prs-row">
+
+        <span class="prs-label">
+          Files Changed
+        </span>
+
+        <span class="prs-value">
+          ${escapeHTML(String(filesChanged || "?"))}
+        </span>
+
+      </div>
+
+
+      <!-- RISK SCORE -->
+
+      <div class="prs-row">
+
+        <span class="prs-label">
+          Risk Score
+        </span>
+
+        <div class="prs-value">
+
+          <div class="prs-score-container">
+
+            <div class="prs-score-number">
+              ${escapeHTML(String(riskScore ?? "?"))}/100
+            </div>
+
+            <div class="prs-score-bar">
+
+              <div
+                class="prs-score-fill"
+                style="width:${Math.min(
+                  Math.max(Number(riskScore) || 0, 0),
+                  100
+                )}%">
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- RISK -->
+
+      <div class="prs-row prs-row-risk">
+
+        <span class="prs-label">
+          Risk
+        </span>
+
+        <span class="prs-value">
+
+          <span class="prs-risk-badge ${getRiskClass(risk)}">
+            ${escapeHTML(risk || "?")}
+          </span>
+
+          <span class="prs-risk-reason">
+            ${escapeHTML(riskReason || "")}
+          </span>
+
+        </span>
+
+      </div>
+
+
+      <!-- SUMMARY -->
+
+      <div class="prs-section">
+
+        <div class="prs-section-title">
+          Technical Summary
+        </div>
+
+        <div class="prs-summary">
+          ${escapeHTML(summary || "No summary available")}
+        </div>
+
+      </div>
+
+
+      <!-- POTENTIAL BUGS -->
+
+      <div class="prs-section">
+
+        <div class="prs-section-title">
+          🐞 Potential Bugs
+        </div>
+
+        ${
+          bugHTML ||
+          `<div class="prs-empty">
+             No potential bugs detected
+           </div>`
+        }
+
+      </div>
+
+
+      <!-- MISSING TESTS -->
+
+      <div class="prs-section">
+
+        <div class="prs-section-title">
+          🧪 Missing Tests
+        </div>
+
+        ${createList(missingTests)}
+
+      </div>
+
+
+      <!-- SECURITY -->
+
+      <div class="prs-section">
+
+        <div class="prs-section-title">
+          🔐 Security Concerns
+        </div>
+
+        ${createList(securityConcerns)}
+
+      </div>
+
+
+      <!-- PERFORMANCE -->
+
+      <div class="prs-section">
+
+        <div class="prs-section-title">
+          ⚡ Performance Concerns
+        </div>
+
+        ${createList(performanceConcerns)}
+
+      </div>
+
+
+      <!-- REVIEW CHECKLIST -->
+
+      <div class="prs-section">
+
+        <div class="prs-section-title">
+          ✓ Review Checklist
+        </div>
+
+        ${createList(reviewFocus)}
+
+      </div>
+
+
+    </div>
+  `;
+}
 
     return "";
   }
