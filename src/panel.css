@@ -1,346 +1,677 @@
-/* PR Summarizer Panel Styles */
+/* =========================================================
+   PR Summarizer Panel Styles
+   ========================================================= */
 
 #pr-summarizer-panel {
   all: initial;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    system-ui,
+    sans-serif;
+
   box-sizing: border-box;
   display: block;
+
   margin: 12px 0 16px 0;
+
   border-radius: 8px;
   border: 1.5px solid #d0d7de;
+
   background: #ffffff;
+  color: #1f2328;
+
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+
   overflow: hidden;
   max-width: 100%;
+
   transition: border-color 0.2s;
 }
 
-#pr-summarizer-panel * {
+
+/* =========================================================
+   Global Reset Inside Extension
+   ========================================================= */
+
+#pr-summarizer-panel *,
+#pr-summarizer-panel *::before,
+#pr-summarizer-panel *::after {
   box-sizing: border-box;
   font-family: inherit;
 }
 
-/* Header */
-.prs-header {
+
+/* =========================================================
+   Header
+   ========================================================= */
+
+#pr-summarizer-panel .prs-header {
   display: flex;
   align-items: center;
+
   gap: 8px;
+
   padding: 10px 14px;
+
   background: #f6f8fa;
+
   border-bottom: 1.5px solid #d0d7de;
 }
 
-.prs-logo {
+
+#pr-summarizer-panel .prs-logo {
   color: #6e40c9;
+
   font-size: 13px;
   line-height: 1;
 }
 
-.prs-title {
+
+#pr-summarizer-panel .prs-title {
   font-size: 13px;
   font-weight: 600;
+
   color: #1f2328;
+
   letter-spacing: 0.01em;
+
   flex: 1;
 }
 
-/* Idle state */
-.prs-idle {
+
+/* =========================================================
+   Idle State
+   ========================================================= */
+
+#pr-summarizer-panel .prs-idle {
   padding: 14px 16px;
+
   display: flex;
   align-items: center;
+
   gap: 12px;
+
+  color: #1f2328;
 }
 
-.prs-hint {
+
+#pr-summarizer-panel .prs-hint {
   margin: 0;
+
   font-size: 12px;
+
   color: #57606a;
 }
 
-/* Loading */
-.prs-loading {
+
+/* =========================================================
+   Loading State
+   ========================================================= */
+
+#pr-summarizer-panel .prs-loading {
   padding: 16px;
+
   display: flex;
   align-items: center;
+
   gap: 10px;
+
   color: #57606a;
+
   font-size: 13px;
 }
 
-.prs-spinner {
+
+#pr-summarizer-panel .prs-spinner {
   width: 16px;
   height: 16px;
+
   border: 2px solid #d0d7de;
   border-top-color: #6e40c9;
+
   border-radius: 50%;
+
   animation: prs-spin 0.7s linear infinite;
+
   flex-shrink: 0;
 }
 
+
 @keyframes prs-spin {
-  to { transform: rotate(360deg); }
+
+  to {
+    transform: rotate(360deg);
+  }
+
 }
 
-/* Error */
-.prs-error {
+
+/* =========================================================
+   Error State
+   ========================================================= */
+
+#pr-summarizer-panel .prs-error {
   padding: 14px 16px;
+
   display: flex;
   flex-direction: column;
+
   gap: 8px;
+
+  color: #d1242f;
 }
 
-.prs-error-icon {
+
+#pr-summarizer-panel .prs-error-icon {
   font-size: 16px;
+
   color: #d1242f;
 }
 
-.prs-error p {
+
+#pr-summarizer-panel .prs-error p {
   margin: 0;
+
   font-size: 13px;
+
   color: #d1242f;
+
   line-height: 1.4;
 }
 
-/* Result body */
-.prs-body {
+
+/* =========================================================
+   Result Body
+   ========================================================= */
+
+#pr-summarizer-panel .prs-body {
   padding: 12px 16px;
+
   display: flex;
   flex-direction: column;
+
   gap: 0;
+
+  background: #ffffff;
+  color: #1f2328;
 }
 
-.prs-row {
+
+/* =========================================================
+   Result Rows
+   ========================================================= */
+
+#pr-summarizer-panel .prs-row {
   display: flex;
+
   align-items: flex-start;
+
   gap: 10px;
+
   padding: 8px 0;
+
   border-bottom: 1px solid #f0f1f2;
+
+  color: #1f2328;
 }
 
-.prs-row:last-child {
+
+#pr-summarizer-panel .prs-row:last-child {
   border-bottom: none;
 }
 
-.prs-label {
+
+#pr-summarizer-panel .prs-label {
   font-size: 11px;
   font-weight: 600;
+
   color: #57606a;
+
   text-transform: uppercase;
+
   letter-spacing: 0.05em;
+
   min-width: 96px;
+
   padding-top: 2px;
+
   flex-shrink: 0;
 }
 
-.prs-value {
+
+#pr-summarizer-panel .prs-value {
   font-size: 13px;
+
   color: #1f2328;
+
   line-height: 1.5;
+
   flex: 1;
 }
 
-.prs-summary {
+
+/* =========================================================
+   Technical Summary
+   ========================================================= */
+
+#pr-summarizer-panel .prs-summary {
   color: #444c56;
+
+  font-size: 13px;
+
+  line-height: 1.6;
 }
 
-/* Risk badge */
-.prs-row-risk .prs-value {
+
+/* =========================================================
+   Risk
+   ========================================================= */
+
+#pr-summarizer-panel .prs-row-risk .prs-value {
   display: flex;
+
   align-items: flex-start;
+
   gap: 8px;
+
   flex-wrap: wrap;
 }
 
-.prs-risk-badge {
+
+#pr-summarizer-panel .prs-risk-badge {
   display: inline-block;
+
   font-size: 11px;
   font-weight: 700;
+
   letter-spacing: 0.04em;
+
   text-transform: uppercase;
+
   padding: 2px 8px;
+
   border-radius: 20px;
+
   flex-shrink: 0;
+
   margin-top: 1px;
 }
 
-.risk-low {
+
+#pr-summarizer-panel .risk-low {
   background: #dafbe1;
+
   color: #116329;
 }
 
-.risk-medium {
+
+#pr-summarizer-panel .risk-medium {
   background: #fff8c5;
+
   color: #7d4e00;
 }
 
-.risk-high {
+
+#pr-summarizer-panel .risk-high {
   background: #ffebe9;
+
   color: #b91c1c;
 }
 
-.prs-risk-reason {
+
+/* Added for V2 Critical Risk */
+
+#pr-summarizer-panel .risk-critical {
+  background: #ffebe9;
+
+  color: #82071e;
+
+  border: 1px solid #cf222e;
+}
+
+
+#pr-summarizer-panel .prs-risk-reason {
   font-size: 12px;
+
   color: #57606a;
+
   line-height: 1.4;
+
   padding-top: 2px;
 }
 
-/* Review focus */
-.prs-row-focus {
-  align-items: flex-start;
-}
 
-.prs-focus-list {
-  margin: 0;
-  padding: 0 0 0 16px;
-  list-style: disc;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
+/* =========================================================
+   Risk Score
+   ========================================================= */
 
-.prs-focus-list li {
-  font-size: 13px;
-  color: #1f2328;
-  line-height: 1.45;
-}
-
-/* Buttons */
-.prs-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1.5px solid transparent;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-  white-space: nowrap;
-  text-decoration: none;
-  line-height: 1.4;
-}
-
-.prs-btn-primary {
-  background: #6e40c9;
-  color: #ffffff;
-  border-color: #6e40c9;
-}
-
-.prs-btn-primary:hover {
-  background: #5a32a3;
-  border-color: #5a32a3;
-}
-
-.prs-btn-secondary {
-  background: #f6f8fa;
-  color: #1f2328;
-  border-color: #d0d7de;
-}
-
-.prs-btn-secondary:hover {
-  background: #eaeef2;
-}
-
-.prs-btn-ghost {
-  background: transparent;
-  color: #57606a;
-  border-color: transparent;
-  font-weight: 500;
-  padding: 5px 8px;
-}
-
-.prs-btn-ghost:hover {
-  color: #1f2328;
-  background: #f0f1f2;
-}
-
-.prs-regen {
-  margin-left: auto;
-  font-size: 11px;
-}
-
-/* GitLab adjustments — slightly wider gutters */
-.gitlab-merge-request-details #pr-summarizer-panel {
-  margin: 16px 0;
-}
-
-.prs-section {
-  padding: 16px;
-  border-top: 1px solid var(--borderColor-default, #d0d7de);
-}
-
-.prs-section-title {
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 10px;
-}
-
-.prs-score-container {
+#pr-summarizer-panel .prs-score-container {
   width: 100%;
+
+  color: #1f2328;
 }
 
-.prs-score-number {
+
+#pr-summarizer-panel .prs-score-number {
   font-size: 18px;
   font-weight: 700;
+
   margin-bottom: 6px;
+
+  color: #1f2328;
 }
 
-.prs-score-bar {
+
+#pr-summarizer-panel .prs-score-bar {
   width: 100%;
+
   height: 8px;
+
   background: #eaeef2;
+
   border-radius: 4px;
+
   overflow: hidden;
 }
 
-.prs-score-fill {
+
+#pr-summarizer-panel .prs-score-fill {
   height: 100%;
-  background: currentColor;
+
+  background: #6e40c9;
+
   border-radius: 4px;
+
+  transition: width 0.4s ease;
 }
 
-.prs-bug {
-  padding: 12px;
+
+/* =========================================================
+   V2 Sections
+   ========================================================= */
+
+#pr-summarizer-panel .prs-section {
+  padding: 16px 0;
+
+  border-top: 1px solid #d0d7de;
+
+  background: #ffffff;
+
+  color: #1f2328;
+}
+
+
+#pr-summarizer-panel .prs-section-title {
+  display: block;
+
+  font-weight: 600;
+  font-size: 14px;
+
   margin-bottom: 10px;
-  border: 1px solid var(--borderColor-default, #d0d7de);
+
+  color: #1f2328 !important;
+
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   Potential Bugs
+   ========================================================= */
+
+#pr-summarizer-panel .prs-bug {
+  padding: 12px;
+
+  margin-bottom: 10px;
+
+  border: 1px solid #d0d7de;
+
   border-radius: 6px;
+
+  background: #ffffff;
+
+  color: #1f2328;
 }
 
-.prs-bug-header {
+
+#pr-summarizer-panel .prs-bug:last-child {
+  margin-bottom: 0;
+}
+
+
+#pr-summarizer-panel .prs-bug-header {
   display: flex;
+
   align-items: center;
+
   gap: 8px;
+
   margin-bottom: 8px;
+
+  color: #1f2328;
 }
 
-.prs-bug-file {
-  font-family: monospace;
+
+#pr-summarizer-panel .prs-bug-file {
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
   font-size: 12px;
+
+  color: #1f2328 !important;
 }
 
-.prs-bug-issue {
+
+#pr-summarizer-panel .prs-bug-issue {
   font-size: 13px;
+
   margin-bottom: 6px;
+
+  color: #1f2328 !important;
+
+  line-height: 1.5;
 }
 
-.prs-bug-suggestion {
+
+#pr-summarizer-panel .prs-bug-suggestion {
   font-size: 12px;
-  opacity: 0.8;
+
+  color: #57606a !important;
+
+  line-height: 1.5;
 }
 
-.prs-severity {
+
+/* =========================================================
+   Bug Severity
+   ========================================================= */
+
+#pr-summarizer-panel .prs-severity {
+  display: inline-block;
+
   padding: 2px 7px;
+
   border-radius: 10px;
+
   font-size: 11px;
   font-weight: 600;
+
   border: 1px solid currentColor;
 }
 
-.prs-empty {
+
+#pr-summarizer-panel .prs-severity-low {
+  background: #dafbe1;
+
+  color: #116329;
+}
+
+
+#pr-summarizer-panel .prs-severity-medium {
+  background: #fff8c5;
+
+  color: #7d4e00;
+}
+
+
+#pr-summarizer-panel .prs-severity-high {
+  background: #ffebe9;
+
+  color: #b91c1c;
+}
+
+
+/* =========================================================
+   Lists
+   ========================================================= */
+
+#pr-summarizer-panel .prs-focus-list {
+  margin: 0;
+
+  padding: 0 0 0 20px;
+
+  list-style: disc;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  color: #1f2328 !important;
+}
+
+
+#pr-summarizer-panel .prs-focus-list li {
+  display: list-item;
+
   font-size: 13px;
-  opacity: 0.65;
+
+  color: #1f2328 !important;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   Empty States
+   ========================================================= */
+
+#pr-summarizer-panel .prs-empty {
+  font-size: 13px;
+
+  color: #656d76 !important;
+
   padding: 6px 0;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+
+#pr-summarizer-panel .prs-btn {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 5px 12px;
+
+  border-radius: 6px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  border: 1.5px solid transparent;
+
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+
+  white-space: nowrap;
+
+  text-decoration: none;
+
+  line-height: 1.4;
+}
+
+
+#pr-summarizer-panel .prs-btn-primary {
+  background: #6e40c9;
+
+  color: #ffffff;
+
+  border-color: #6e40c9;
+}
+
+
+#pr-summarizer-panel .prs-btn-primary:hover {
+  background: #5a32a3;
+
+  border-color: #5a32a3;
+}
+
+
+#pr-summarizer-panel .prs-btn-secondary {
+  background: #f6f8fa;
+
+  color: #1f2328;
+
+  border-color: #d0d7de;
+}
+
+
+#pr-summarizer-panel .prs-btn-secondary:hover {
+  background: #eaeef2;
+}
+
+
+#pr-summarizer-panel .prs-btn-ghost {
+  background: transparent;
+
+  color: #57606a;
+
+  border-color: transparent;
+
+  font-weight: 500;
+
+  padding: 5px 8px;
+}
+
+
+#pr-summarizer-panel .prs-btn-ghost:hover {
+  color: #1f2328;
+
+  background: #f0f1f2;
+}
+
+
+#pr-summarizer-panel .prs-regen {
+  margin-left: auto;
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   GitLab Adjustments
+   ========================================================= */
+
+.gitlab-merge-request-details #pr-summarizer-panel {
+  margin: 16px 0;
 }
