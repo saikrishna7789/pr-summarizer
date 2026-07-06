@@ -1,12 +1,16 @@
+console.log("Background Loaded");
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
-    console.log("=== BACKGROUND RECEIVED ===");
-    console.log(request);
-
-    if (request.type !== "OLLAMA") return;
+    if (request.type !== "OLLAMA") {
+        return;
+    }
 
     (async () => {
+
         try {
+
+            console.log("Incoming Request:", request);
 
             const response = await fetch(`${request.ollamaUrl}/api/generate`, {
                 method: "POST",
@@ -20,23 +24,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 })
             });
 
-            console.log("STATUS:", response.status);
+            console.log("HTTP Status:", response.status);
 
-            const text = await response.text();
+            const body = await response.text();
 
-            console.log("BODY:", text);
+            console.log("Raw Body:", body);
 
             if (!response.ok) {
                 sendResponse({
                     success: false,
-                    error: text
+                    error: body
                 });
                 return;
             }
 
+            const json = JSON.parse(body);
+
             sendResponse({
                 success: true,
-                response: JSON.parse(text).response
+                response: json.response
             });
 
         } catch (e) {
@@ -49,7 +55,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             });
 
         }
+
     })();
 
     return true;
+
 });
