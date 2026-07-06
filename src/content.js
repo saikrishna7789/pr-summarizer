@@ -161,49 +161,94 @@ Respond with ONLY this JSON structure:
     return JSON.parse(clean);
   }
 
-  async function generateWithOllama(prData, ollamaUrl, modelName) {
+async function generateWithOllama(prData, ollamaUrl, modelName) {
+
     const prompt = buildPrompt(prData);
 
-    const data = await chrome.runtime.sendMessage({
-        type: "OLLAMA",
-        prompt: prompt,
-        ollamaUrl: ollamaUrl || "http://localhost:11434",
-        model: modelName || "qwen2.5-coder:7b"
-    });
+    console.log("========== OLLAMA DEBUG ==========");
+    console.log("URL:", ollamaUrl);
+    console.log("Model:", modelName);
+    console.log("Prompt length:", prompt.length);
 
-    if (!data) {
-        throw new Error("No response received from background service.");
+    let data;
+
+    try {
+
+        data = await chrome.runtime.sendMessage({
+            type: "OLLAMA",
+            prompt: prompt,
+            ollamaUrl: ollamaUrl || "http://127.0.0.1:11434",
+            model: modelName || "qwen2.5-coder:7b"
+        });
+
+        console.log("Background Response:", data);
+
+    } catch (error) {
+
+        console.error("sendMessage failed:", error);
+
+        throw new Error(
+            "Background communication failed: " + error.message
+        );
     }
 
-    if (data.error) {
-        throw new Error(data.error);
+    if (data === undefined) {
+        throw new Error(
+            "Background returned undefined. Check Service Worker console."
+        );
     }
 
-    if (!data.success) {
-        throw new Error(data.error || "Unknown error");
+    if (data === null) {
+        throw new Error(
+            "Background returned null."
+        );
     }
 
-    const text = data.response;
+    if (data.success !== true) {
 
-    if (!text) {
-        throw new Error("Empty response from Ollama.");
+        console.error("Ollama failure response:", data);
+
+        throw new Error(
+            data.error
+                ? String(data.error)
+                : "Background request failed. Response: " +
+                  JSON.stringify(data)
+        );
     }
 
-    // Remove markdown fences if the model adds them
-    const clean = text
-        .replace(/```json/g, "")
+    if (!data.response) {
+        throw new Error(
+            "Ollama returned empty response: " +
+            JSON.stringify(data)
+        );
+    }
+
+    console.log("Raw Ollama Output:", data.response);
+
+    const clean = data.response
+        .replace(/```json/gi, "")
         .replace(/```/g, "")
         .trim();
 
-    // Extract JSON if extra text exists
     const match = clean.match(/\{[\s\S]*\}/);
 
     if (!match) {
-        console.log("Ollama Raw Response:", clean);
-        throw new Error("Model did not return valid JSON.");
+        throw new Error(
+            "No JSON found in model output: " +
+            clean.substring(0, 500)
+        );
     }
 
-    return JSON.parse(match[0]);
+    try {
+        return JSON.parse(match[0]);
+    } catch (error) {
+
+        console.error("JSON parse failure:", match[0]);
+
+        throw new Error(
+            "Invalid JSON from model: " + error.message
+        );
+    }
 }
 
   // Unified entrypoint: chooses provider based on stored settings
